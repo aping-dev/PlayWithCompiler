@@ -46,8 +46,8 @@ def test_simple_calculator():
     try:
         node = calculator.intDeclare(tokens)
         calculator.dump_ast(node, "")
-    except Exception:
-        print('err')
+    except Exception as e:
+        print(e)
 
     # 测试表达式
     script = "2+3*5"

@@ -34,8 +34,8 @@ class SimpleCalculator(object):
             tree = self.parse(script)
             self.dump_ast(tree, "@")
             self._evaluate(tree, "|")
-        except Exception:
-            print('err')
+        except Exception as e:
+            print(e)
 
     '''
     解析脚本，并返回根节点
@@ -144,20 +144,20 @@ class SimpleCalculator(object):
     语法解析：加法表达式
     '''
     def additive(self, tokens):
-        child1 = self.multiplicative(tokens)
+        child1 = self.multiplicative(tokens) # 应用add规则
         node = child1
-
-        token = tokens.peek()
-        if (child1 != None and token != None):
-            if (token.token_type == TokenType.Plus or token.token_type == TokenType.Minus):
-                token = tokens.read()
-                child2 = self.additive(tokens)
-                if (child2 != None):
+        if (child1 != None):
+            while True:  # 循环应用add'
+                token = tokens.peek()
+                if (token != None and (token.token_type == TokenType.Plus or token.token_type == TokenType.Minus)):
+                    token = tokens.read() # 读出加号
+                    child2 = self.multiplicative(tokens)  # 计算下级节点
                     node = SimpleASTNode(ASTNodeType.Additive, token.token_text)
-                    node.addChild(child1)
+                    node.addChild(child1)  # 注意，新节点在顶层，保证正确的结合性
                     node.addChild(child2)
+                    child1 = node
                 else:
-                    raise "invalid additive expression, expecting the right part."
+                    break
         return node
 
     '''
