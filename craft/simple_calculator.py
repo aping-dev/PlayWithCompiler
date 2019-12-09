@@ -166,18 +166,21 @@ class SimpleCalculator(object):
     def multiplicative(self, tokens):
         child1 = self.primary(tokens)
         node = child1
-
-        token = tokens.peek()
-        if (child1 != None and token != None):
-            if (token.token_type == TokenType.Star or token.token_type == TokenType.Slash):
-                token = tokens.read()
-                child2 = self.primary(tokens)
-                if (child2 != None):
-                    node = SimpleASTNode(ASTNodeType.Multiplicative, token.token_text)
-                    node.addChild(child1)
-                    node.addChild(child2)
+        if (child1 != None):
+            while True:
+                token = tokens.peek()
+                if (token != None) and (token.token_type == TokenType.Star or token.token_type == TokenType.Slash):
+                    token = tokens.read()
+                    child2 = self.primary(tokens)
+                    if (child2 != None):
+                        node = SimpleASTNode(ASTNodeType.Multiplicative, token.token_text)
+                        node.addChild(child1)
+                        node.addChild(child2)
+                        child1 = node
+                    else:
+                        raise "invalid additive expression, expecting the right part."
                 else:
-                    raise "invalid additive expression, expecting the right part."
+                    break
         return node
 
     '''

@@ -60,7 +60,11 @@ def test_simple_calculator():
     calculator.evaluate(script)
 
     script = "2+3+4"
-    print("\n计算: {}，结合性出现错误。".format(script))
+    print("\n计算: {}".format(script))
+    calculator.evaluate(script)
+
+    script = "2*3*4"
+    print("\n计算: {}".format(script))
     calculator.evaluate(script)
 
 if __name__ == '__main__':
