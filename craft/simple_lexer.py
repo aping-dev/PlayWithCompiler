@@ -11,6 +11,12 @@ class SimpleToken(Token):
         self.token_type = None
         self.token_text = ''
 
+    def get_type(self):  # Token的类型
+        return self.token_type
+
+    def get_text(self):     # Token的文本值
+        return self.token_text
+
 '''
 一个简单的Token流。是把一个Token列表进行了封装。
 '''
@@ -35,10 +41,10 @@ class SimpleTokenReader(TokenReader):
         if (self.pos > 0):
             self.pos = self.pos - 1
 
-    def getPosition(self):
+    def get_position(self):
         return self.pos
 
-    def setPosition(self, position):
+    def set_position(self, position):
         if (position >=0 and position < len(self.tokens)):
             self.pos = position
 
@@ -87,15 +93,15 @@ class SimpleLexer(object):
         self.tokens = [] # 保存解析出来的Token
 
     # 是否是字母
-    def isAlpha(self, ch):
+    def is_alpha(self, ch):
         return ((ch >= 'a' and ch <= 'z') or (ch >= 'A' and ch <= 'Z'))
 
     # 是否是数字
-    def isDigit(self, ch):
+    def is_digit(self, ch):
         return (ch >= '0' and ch <= '9')
 
     # 是否是空白字符
-    def isBlank(self, ch):
+    def is_blank(self, ch):
         return ch == ' ' or ch == '\t' or ch == '\n'
 
     def dump(self, tokenReader):
@@ -110,20 +116,20 @@ class SimpleLexer(object):
     这个初始状态其实并不做停留，它马上进入其他状态。
     开始解析的时候，进入初始状态；某个Token解析完毕，也进入初始状态，在这里把Token记下来，然后建立一个新的Token。
     '''
-    def initToken(self, ch):
+    def init_token(self, ch):
         if (len(self.token.token_text) > 0):
             self.tokens.append(self.token)
             self.token = SimpleToken()
 
         new_state = DfaState.Initial
-        if (self.isAlpha(ch)): # 第一个字符是字母      
+        if (self.is_alpha(ch)): # 第一个字符是字母      
             if (ch == 'i'):
                 new_state = DfaState.Id_int1
             else: 
                 new_state = DfaState.Id # 进入Id状态
             self.token.token_type = TokenType.Identifier
             self.token.token_text += ch
-        elif (self.isDigit(ch)):  # 第一个字符是数字   
+        elif (self.is_digit(ch)):  # 第一个字符是数字   
             new_state = DfaState.IntLiteral
             self.token.token_type = TokenType.IntLiteral
             self.token.token_text += ch
@@ -181,55 +187,55 @@ class SimpleLexer(object):
         while (ich < len(code)):
             ch = code[ich]
             if (state == DfaState.Initial):
-                state = self.initToken(ch)          # 重新确定后续状态
+                state = self.init_token(ch)          # 重新确定后续状态
             elif (state == DfaState.Id):
-                if (self.isAlpha(ch) or self.isDigit(ch)):
+                if (self.is_alpha(ch) or self.is_digit(ch)):
                     self.token.token_text += ch   # 保持标识符状态
                 else:
-                    state = self.initToken(ch)   # 退出标识符状态，并保存Token
+                    state = self.init_token(ch)   # 退出标识符状态，并保存Token
             elif (state == DfaState.GT):
                 if (ch == '='):
                     self.token.token_type = TokenType.GE  # 转换成GE
                     state = DfaState.GE
                     self.token.token_text += ch
                 else:
-                    state = self.initToken(ch)   # 退出GT状态，并保存Token
+                    state = self.init_token(ch)   # 退出GT状态，并保存Token
             elif (state in [DfaState.GE, DfaState.Assignment, DfaState.Plus, DfaState.Minus, DfaState.Star,  
                     DfaState.Slash, DfaState.SemiColon, DfaState.LeftParen, DfaState.RightParen]):
-                state = self.initToken(ch)       # 退出当前状态，并保存Token
+                state = self.init_token(ch)       # 退出当前状态，并保存Token
             elif (state == DfaState.IntLiteral):
-                if (self.isDigit(ch)):
+                if (self.is_digit(ch)):
                     self.token.token_text += ch   # 继续保持在数字字面量状态
                 else:
-                    state = self.initToken(ch)   # 退出当前状态，并保存Token
+                    state = self.init_token(ch)   # 退出当前状态，并保存Token
             elif (state == DfaState.Id_int1):
                 if (ch == 'n'):
                     state = DfaState.Id_int2
                     self.token.token_text += ch
-                elif (self.isDigit(ch) or self.isAlpha(ch)):
+                elif (self.is_digit(ch) or self.is_alpha(ch)):
                     state = DfaState.Id     # 切换回Id状态
                     self.token.token_text += ch
                 else:
-                    state = self.initToken(ch)
+                    state = self.init_token(ch)
             elif (state == DfaState.Id_int2):
                 if (ch == 't'):
                     state = DfaState.Id_int3
                     self.token.token_text += ch
-                elif (self.isDigit(ch) or self.isAlpha(ch)):
+                elif (self.is_digit(ch) or self.is_alpha(ch)):
                     state = DfaState.Id    # 切换回id状态
                     self.token.token_text += ch
                 else:
-                    state = self.initToken(ch)
+                    state = self.init_token(ch)
             elif (state == DfaState.Id_int3):
-                if (self.isBlank(ch)):
+                if (self.is_blank(ch)):
                     self.token.token_type = TokenType.Int
-                    state = self.initToken(ch)
+                    state = self.init_token(ch)
                 else:
                     state = DfaState.Id    # 切换回Id状态
                     self.token.token_text += ch
             ich = ich + 1
         # 把最后一个token送进去
         if (len(self.token.token_text) > 0):
-            self.initToken(ch)
+            self.init_token(ch)
 
         return SimpleTokenReader(self.tokens)

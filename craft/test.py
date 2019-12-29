@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from play_with_compiler.craft.simple_lexer import SimpleLexer
-from play_with_compiler.craft.simple_calculator import SimpleCalculator
+from simple_lexer import SimpleLexer
+from simple_calculator import SimpleCalculator
+from simple_parser import SimpleParser
 
-def test_simple_Lexer():
+def test_simple_lexer():
     lexer = SimpleLexer()
 
     script = "int age = 45;"
@@ -44,8 +45,8 @@ def test_simple_calculator():
     lexer = SimpleLexer()
     tokens = lexer.tokenize(script)
     try:
-        node = calculator.intDeclare(tokens)
-        calculator.dump_ast(node, "")
+        node = calculator.int_declare(tokens)
+        calculator.dump_AST(node, "")
     except Exception as e:
         print(e)
 
@@ -67,6 +68,40 @@ def test_simple_calculator():
     print("\n计算: {}".format(script))
     calculator.evaluate(script)
 
+def test_simple_parser():
+    parser = SimpleParser()
+    script = ""
+    tree = None
+
+    try:
+        script = "int age = 45;"
+        print("解析：%s" % script)
+
+        tree = parser.parse(script)
+        parser.dump_AST(tree, "")
+    except Exception as e:
+        print(e)
+    
+    # 测试异常语法
+    try:
+        script = "2+3+;"
+        print("解析：%s" % script)
+        tree = parser.parse(script)
+        parser.dump_AST(tree, "")
+    except Exception as e:
+        print(e)
+
+    # 测试异常语法
+    try:
+        script = "2+3*;"
+        print("解析：%s" % script)
+        tree = parser.parse(script)
+        parser.dump_AST(tree, "")
+    except Exception as e:
+        print(e)
+
+
 if __name__ == '__main__':
     #test_simple_lexer()
-    test_simple_calculator()
+    #test_simple_calculator()
+    test_simple_parser()

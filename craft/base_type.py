@@ -40,9 +40,9 @@ class TokenType(Enum):
 只有类型和文本值两个属性。
 '''
 class Token(object):
-    def getType(self):  # Token的类型
+    def get_type(self):  # Token的类型
         pass
-    def getText(self):     # Token的文本值
+    def get_text(self):     # Token的文本值
         pass
 
 '''
@@ -67,13 +67,13 @@ AST的节点。
 属性包括AST的类型、文本值、下级子节点和父节点
 '''
 class ASTNode(object):
-    def getParent(self):    # 父节点
+    def get_parent(self):    # 父节点
         pass
-    def getChildren(self):  # 子节点
+    def get_children(self):  # 子节点
         pass
-    def getType(self):      # AST类型
+    def get_type(self):      # AST类型
         pass
-    def getText(self):      # 文本值
+    def get_text(self):      # 文本值
         pass
 
 '''
@@ -101,11 +101,11 @@ class TokenReader(object):
     '''
     获取Token流当前的读取位置。
     '''
-    def getPosition(self):
+    def get_position(self):
         pass
 
     '''
     设置Token流当前的读取位置
     '''
-    def setPosition(self, position):
+    def set_position(self, position):
         pass

@@ -15,9 +15,18 @@ class SimpleASTNode(ASTNode):
         self.node_type = node_type
         self.text = text
 
-    def addChild(self, child):
+    def add_child(self, child):
         self.children.append(child)
         child.parent = self
+
+    def get_children(self):
+        return self.children
+
+    def get_type(self):
+        return self.node_type
+
+    def get_text(self):
+        return self.text
 
 '''
 实现一个计算器，但计算的结合性是有问题的。因为它使用了下面的语法规则：
@@ -32,7 +41,7 @@ class SimpleCalculator(object):
     def evaluate(self, script):
         try:
             tree = self.parse(script)
-            self.dump_ast(tree, "@")
+            self.dump_AST(tree, "@")
             self._evaluate(tree, "|")
         except Exception as e:
             print(e)
@@ -49,12 +58,12 @@ class SimpleCalculator(object):
     '''
     打印输出AST的树状结构
     '''
-    def dump_ast(self, node, indent):
+    def dump_AST(self, node, indent):
         if node == None:
             return
         print('{}{} {}'.format(indent, node.node_type, node.text))
         for item in node.children:
-            self.dump_ast(item, indent + "\t")
+            self.dump_AST(item, indent + "\t")
 
     '''
     对某个AST节点求值，并打印求值过程。
@@ -104,7 +113,7 @@ class SimpleCalculator(object):
         child = self.additive(tokens)
 
         if (child != None):
-            node.addChild(child)
+            node.add_child(child)
         return node
 
     '''
@@ -112,7 +121,7 @@ class SimpleCalculator(object):
     int a;
     int b = 2*3;
     '''
-    def intDeclare(self, tokens):
+    def int_declare(self, tokens):
         node = None
         token = tokens.peek()    # 预读
         if (token != None and token.token_type == TokenType.Int): # 匹配Int
@@ -126,18 +135,18 @@ class SimpleCalculator(object):
                     tokens.read()      # 消耗掉等号
                     child = self.additive(tokens)  # 匹配一个表达式
                     if (child == None):
-                        raise "invalide variable initialization, expecting an expression"
+                        raise Exception('invalide variable initialization, expecting an expression')
                     else:
-                        node.addChild(child)
+                        node.add_child(child)
             else:
-                raise "variable name expected"
+                raise Exception('variable name expected')
 
             if (node != None):
                 token = tokens.peek()
                 if (token != None and token.token_type == TokenType.SemiColon):
                     tokens.read()
                 else:
-                    raise "invalid statement, expecting semicolon"
+                    raise Exception('invalid statement, expecting semicolon')
         return node
 
     '''
@@ -153,8 +162,8 @@ class SimpleCalculator(object):
                     token = tokens.read() # 读出加号
                     child2 = self.multiplicative(tokens)  # 计算下级节点
                     node = SimpleASTNode(ASTNodeType.Additive, token.token_text)
-                    node.addChild(child1)  # 注意，新节点在顶层，保证正确的结合性
-                    node.addChild(child2)
+                    node.add_child(child1)  # 注意，新节点在顶层，保证正确的结合性
+                    node.add_child(child2)
                     child1 = node
                 else:
                     break
@@ -174,11 +183,11 @@ class SimpleCalculator(object):
                     child2 = self.primary(tokens)
                     if (child2 != None):
                         node = SimpleASTNode(ASTNodeType.Multiplicative, token.token_text)
-                        node.addChild(child1)
-                        node.addChild(child2)
+                        node.add_child(child1)
+                        node.add_child(child2)
                         child1 = node
                     else:
-                        raise "invalid additive expression, expecting the right part."
+                        raise Exception('invalid additive expression, expecting the right part.')
                 else:
                     break
         return node
@@ -204,7 +213,7 @@ class SimpleCalculator(object):
                     if (token != None and token.token_type == TokenType.RightParen):
                         tokens.read()
                     else:
-                        raise "expecting right parenthesis"
+                        raise Exception('expecting right parenthesis')
                 else:
-                    raise "expecting an additive expression inside parenthesis"
+                    raise Exception('expecting an additive expression inside parenthesis')
         return node  # 这个方法也做了AST的简化，就是不用构造一个primary节点，直接返回子节点。因为它只有一个子节点
